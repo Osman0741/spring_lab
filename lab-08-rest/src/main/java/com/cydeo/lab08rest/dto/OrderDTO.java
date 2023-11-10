@@ -14,4 +14,5 @@ public class OrderDTO {
     private Long customerId;
     private Long paymentId;
     private Long id;
+    private String currency;
 }

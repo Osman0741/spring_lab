@@ -13,4 +13,10 @@ public interface OrderService {
     List<OrderDTO> getAllOrdersByEmail(String email);
     OrderDTO createOrder(OrderDTO orderDTO);
     OrderDTO updateOrder(OrderDTO orderDTO);
-}
+
+
+    OrderDTO findById(Long id) throws Exception;
+    OrderDTO getCurrency(Long id,String currency) throws Exception;
+
+
+ }
