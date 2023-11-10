@@ -93,7 +93,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private CurrencyDTO retrieveCurrency(String currency) {
-        return currencyClient.getCurrency(access_key,currency);
+        return currencyClient.getCurrency(access_key,currency,"USD",1);
     }
 
 

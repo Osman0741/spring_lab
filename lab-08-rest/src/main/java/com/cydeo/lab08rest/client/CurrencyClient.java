@@ -10,6 +10,8 @@ public interface CurrencyClient {
 
     @GetMapping("/live")
     CurrencyDTO getCurrency(@RequestParam(value = "access_key") String key,
-                         @RequestParam(value = "currency") String currency);
+                         @RequestParam(value = "currency") String currency,
+                         @RequestParam(value ="source") String source,
+                         @RequestParam(value = "format") Integer format);
 
 }
