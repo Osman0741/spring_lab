@@ -4,6 +4,7 @@ import com.cydeo.lab08rest.dto.OrderDTO;
 import com.cydeo.lab08rest.enums.PaymentMethod;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface OrderService {
 
@@ -15,8 +16,5 @@ public interface OrderService {
     OrderDTO updateOrder(OrderDTO orderDTO);
 
 
-    OrderDTO findById(Long id) throws Exception;
-    OrderDTO getCurrency(Long id,String currency) throws Exception;
-
-
- }
+    OrderDTO getOrderByIdAndOptionalCurrency(Long orderId, Optional<String> currency);
+}

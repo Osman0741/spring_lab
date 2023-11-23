@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/api/v1/order")
 public class OrderController {
@@ -27,19 +29,12 @@ public class OrderController {
         return ResponseEntity.ok(new ResponseWrapper("Orders are successfully retrieved", orderService.getAllOrders(), HttpStatus.ACCEPTED));
     }
 
-    @GetMapping("{id}")
-    public ResponseEntity<ResponseWrapper> getOrderById(@PathVariable("id") Long id) throws Exception {
-        return ResponseEntity
-                .ok(new ResponseWrapper("Order is successfully retrieved",
-                        orderService.findById(id), HttpStatus.OK));
-    }
-    @GetMapping("/currency/{id}")
-    public ResponseEntity<ResponseWrapper> getCurrentById(@PathVariable("id") Long id, @RequestParam String currency ) throws Exception {
-
-        return ResponseEntity
-                .ok(new ResponseWrapper("Order is successfully retrieved",
-                        orderService.getCurrency(id,currency), HttpStatus.OK));
-    }
+    @GetMapping("{orderId}")
+   public ResponseEntity<ResponseWrapper> getCurrentById(@PathVariable("orderId") Long orderId,
+                                                         @RequestParam(value = "currency", required = false) Optional<String> currency){
+        return ResponseEntity.ok(ResponseWrapper.builder().success(true)
+                .message("Order is successfully retrieved").code(200).data(orderService.getOrderByIdAndOptionalCurrency(orderId,currency)).build());
+   }
 
 
     @GetMapping("/paymentMethod/{paymentMethod}")

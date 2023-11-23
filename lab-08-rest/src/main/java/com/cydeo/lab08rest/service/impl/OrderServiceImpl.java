@@ -4,16 +4,23 @@ import com.cydeo.lab08rest.client.CurrencyClient;
 import com.cydeo.lab08rest.dto.CurrencyDTO;
 import com.cydeo.lab08rest.dto.OrderDTO;
 import com.cydeo.lab08rest.entity.Order;
+import com.cydeo.lab08rest.enums.Currency;
 import com.cydeo.lab08rest.enums.PaymentMethod;
+import com.cydeo.lab08rest.exception.CurrencyInvalidException;
+import com.cydeo.lab08rest.exception.OrderNotFoundException;
 import com.cydeo.lab08rest.mapper.MapperUtil;
 import com.cydeo.lab08rest.repository.OrderRepository;
 import com.cydeo.lab08rest.service.OrderService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -73,27 +80,48 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderDTO findById(Long id) throws Exception {
-        Order order = orderRepository.findById(id)
-                .orElseThrow(()-> new Exception("No Order Found"));
-        OrderDTO orderDTO = mapperUtil.convert(order,new OrderDTO());
+    public OrderDTO getOrderByIdAndOptionalCurrency(Long orderId, Optional<String> currency) {
 
-        return orderDTO;
+        Order foundOrder = orderRepository.findById(orderId)
+                .orElseThrow(()-> new OrderNotFoundException("No Order Found!"));
 
+        OrderDTO orderToReturn = mapperUtil.convert(foundOrder,new OrderDTO());
+
+        BigDecimal currencyRate = getCurrencyRate(currency);
+
+        orderToReturn.setPaidPrice(convertCurrency(foundOrder.getPaidPrice(),currencyRate));
+        orderToReturn.setTotalPrice(convertCurrency(foundOrder.getTotalPrice(),currencyRate));
+
+        return orderToReturn;
     }
 
-    @Override
-    public OrderDTO getCurrency(Long id, String currency) throws Exception {
-        Order order = orderRepository.findById(id)
-                .orElseThrow(()-> new Exception("No Order Found"));
-        OrderDTO orderDTO = mapperUtil.convert(order,new OrderDTO());
-        orderDTO.setPaidPrice(retrieveCurrency(currency).getQuotes().getUsdtry().multiply(orderDTO.getPaidPrice()));
-        orderDTO.setTotalPrice(retrieveCurrency(currency).getQuotes().getUsdtry().multiply(orderDTO.getTotalPrice()));
-        return orderDTO;
+    private BigDecimal convertCurrency(BigDecimal dollarAmount, BigDecimal currencyRate) {
+        return dollarAmount.multiply(currencyRate).setScale(2, RoundingMode.CEILING);
     }
 
-    private CurrencyDTO retrieveCurrency(String currency) {
-        return currencyClient.getCurrency(access_key,currency,"USD",1);
+    private BigDecimal getCurrencyRate(Optional<String> currency) {
+
+        if(currency.isPresent() && !currency.get().toUpperCase().equals("USD")){
+            validateCurrency(currency.get());
+//            BigDecimal rate = currencyClient.getCurrency(access_key, currency).getQuotes().get(currency);
+            CurrencyDTO responseBody = currencyClient.getCurrency(access_key,currency.get()).getBody();
+            BigDecimal rate = responseBody.getQuotes().get("USD"+currency.get().toUpperCase());
+            return rate;
+        }
+        return BigDecimal.ONE;
+
+    }
+    private void validateCurrency(String currency){
+
+    List<String> validateCurrency =   Stream.of(Currency.values())
+               .map(eachCurrency-> eachCurrency.value)
+               .collect(Collectors.toList());
+
+       boolean isValidCurrency = validateCurrency.contains(currency);
+
+       if(!isValidCurrency){
+           throw new CurrencyInvalidException("Invalid Currency");
+       }
     }
 
 
