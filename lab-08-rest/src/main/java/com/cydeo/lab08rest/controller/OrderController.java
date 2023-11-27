@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import javax.validation.Valid;
 import java.util.Optional;
 
 @RestController
@@ -56,8 +57,9 @@ public class OrderController {
         return ResponseEntity.ok(new ResponseWrapper("Order is created", orderService.createOrder(orderDTO), HttpStatus.CREATED));
     }
 
-    @PutMapping
-    public ResponseEntity<ResponseWrapper> updateOrder(@RequestBody OrderDTO orderDTO) {
-        return ResponseEntity.ok(new ResponseWrapper("Order is updated", orderService.updateOrder(orderDTO), HttpStatus.CREATED));
+    @PutMapping("/{orderId}")
+    public ResponseEntity<ResponseWrapper> updateOrder(@PathVariable("orderId") Long orderId,
+                                                        @Valid @RequestBody OrderDTO orderDTO) {
+        return ResponseEntity.ok(new ResponseWrapper("Order is updated", orderService.updateOrder(orderId, orderDTO), HttpStatus.CREATED));
     }
 }

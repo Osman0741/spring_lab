@@ -64,19 +64,18 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderDTO updateOrder(OrderDTO orderDTO) {
-        Order order = mapperUtil.convert(orderDTO, new Order());
-        Order orderToSave = orderRepository.save(order);
-        OrderDTO updatedOrder = mapperUtil.convert(orderToSave, new OrderDTO());
-        updatedOrder.setCartId(updatedOrder.getCartId());
-        updatedOrder.setPaidPrice(updatedOrder.getPaidPrice());
-        updatedOrder.setTotalPrice(updatedOrder.getTotalPrice());
-        updatedOrder.setCustomerId(updatedOrder.getCustomerId());
-        updatedOrder.setPaymentId(updatedOrder.getPaymentId());
-        updatedOrder.setId(updatedOrder.getId());
+    public OrderDTO updateOrder(Long orderId, OrderDTO orderDTO) {
 
+        Order foundOrder = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException("No Order Found!"));
 
-        return updatedOrder;
+        Order orderToUpdate = mapperUtil.convert(orderDTO, new Order());
+        orderToUpdate.setId(foundOrder.getId());
+
+        Order updatedOrder = orderRepository.save(orderToUpdate);
+
+        return mapperUtil.convert(updatedOrder, new OrderDTO());
+
     }
 
     @Override

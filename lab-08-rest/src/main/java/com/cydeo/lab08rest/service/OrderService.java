@@ -13,7 +13,7 @@ public interface OrderService {
 
     List<OrderDTO> getAllOrdersByEmail(String email);
     OrderDTO createOrder(OrderDTO orderDTO);
-    OrderDTO updateOrder(OrderDTO orderDTO);
+    OrderDTO updateOrder(Long orderId, OrderDTO orderDTO);
 
 
     OrderDTO getOrderByIdAndOptionalCurrency(Long orderId, Optional<String> currency);
